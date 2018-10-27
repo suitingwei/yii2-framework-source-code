@@ -111,7 +111,9 @@ class RateLimiter extends ActionFilter
 
         $current = time();
 
+        //
         $allowance += (int) (($current - $timestamp) * $limit / $window);
+        
         if ($allowance > $limit) {
             $allowance = $limit;
         }

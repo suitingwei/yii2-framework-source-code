@@ -298,6 +298,7 @@ class BaseYii
     }
 
     /**
+     * 类似factory了，高级的抽象 factory，根据指定配置创建对象
      * Creates a new object using the given configuration.
      *
      * You may view this method as an enhanced version of the `new` operator.
@@ -357,9 +358,10 @@ class BaseYii
     }
 
     private static $_logger;
-
+    
     /**
-     * @return Logger message logger
+     * @return object
+     * @throws \yii\base\InvalidConfigException
      */
     public static function getLogger()
     {

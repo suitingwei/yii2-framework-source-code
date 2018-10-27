@@ -121,8 +121,14 @@ abstract class Target extends Component
      */
     public function collect($messages, $final)
     {
-        $this->messages = array_merge($this->messages, static::filterMessages($messages, $this->getLevels(), $this->categories, $this->except));
+        $this->messages = array_merge(
+            //原始积累的数据
+            $this->messages,
+            //根据这个logTarget的level,categories去过滤这些消息，只处理要处理的消息
+            static::filterMessages($messages, $this->getLevels(), $this->categories, $this->except)
+        );
         $count = count($this->messages);
+        //除了 logger 本身有一个 c
         if ($count > 0 && ($final || $this->exportInterval > 0 && $count >= $this->exportInterval)) {
             if (($context = $this->getContextMessage()) !== '') {
                 $this->messages[] = [$context, Logger::LEVEL_INFO, 'application', YII_BEGIN_TIME];
@@ -212,6 +218,12 @@ abstract class Target extends Component
     }
 
     /**
+     * 根据 level 和 category 来过滤消息，是否该 target/handler 需要接管这个message
+     * -----------------------------------------------------------------------------------
+     * 在monolog里这个操作是交由 logger 层面，通过调用一个isHandling interface（handler)实现
+     * 来判断是否需要分发给这个handler。 但是Monolog是没有做内存 cache，他的streamHandler
+     * 都是直接进行的fwrite.
+     *
      * Filters the given messages according to their categories and levels.
      * @param array $messages messages to be filtered.
      * The message structure follows that in [[Logger::messages]].

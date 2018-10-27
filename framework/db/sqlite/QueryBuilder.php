@@ -108,7 +108,7 @@ class QueryBuilder extends \yii\db\QueryBuilder
             . $this->update($table, $updateColumns, $updateCondition, $params);
         return "$updateSql; $insertSql;";
     }
-
+    
     /**
      * Generates a batch INSERT SQL statement.
      *
@@ -124,10 +124,15 @@ class QueryBuilder extends \yii\db\QueryBuilder
      *
      * Note that the values in each row must match the corresponding column names.
      *
-     * @param string $table the table that new rows will be inserted into.
-     * @param array $columns the column names
-     * @param array|\Generator $rows the rows to be batch inserted into the table
+     * @param string           $table   the table that new rows will be inserted into.
+     * @param array            $columns the column names
+     * @param array|\Generator $rows    the rows to be batch inserted into the table
+     * @param array            $params
+     *
      * @return string the batch INSERT SQL statement
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
+     * @throws \yii\db\Exception
      */
     public function batchInsert($table, $columns, $rows, &$params = [])
     {

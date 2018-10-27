@@ -96,6 +96,8 @@ interface ActiveRecordInterface extends StaticInstanceInterface
     public static function isPrimaryKey($keys);
 
     /**
+     * 这个方法其实应该叫做createQuery之类的，因为他的实质是打通了 model 到 queryBuilder的桥梁
+     * 在yii2里，model 叫做 ActiveRecord, 而这个接口就是所有的activeRecord需要实现的
      * Creates an [[ActiveQueryInterface]] instance for query purpose.
      *
      * The returned [[ActiveQueryInterface]] instance can be further customized by calling

@@ -72,10 +72,11 @@ class Dispatcher extends Component
      * @var Logger the logger.
      */
     private $_logger;
-
-
+    
+    
     /**
      * {@inheritdoc}
+     * @throws \yii\base\InvalidConfigException
      */
     public function __construct($config = [])
     {
@@ -118,11 +119,14 @@ class Dispatcher extends Component
 
         return $this->_logger;
     }
-
+    
     /**
      * Sets the connected logger.
+     *
      * @param Logger|string|array $value the logger to be used. This can either be a logger instance
-     * or a configuration that will be used to create one using [[Yii::createObject()]].
+     *                                   or a configuration that will be used to create one using [[Yii::createObject()]].
+     *
+     * @throws \yii\base\InvalidConfigException
      */
     public function setLogger($value)
     {
@@ -176,6 +180,7 @@ class Dispatcher extends Component
     }
 
     /**
+     * 分发 logger 里记录的日志到所有的 target 去进行存储。
      * Dispatches the logged messages to [[targets]].
      * @param array $messages the logged messages
      * @param bool $final whether this method is called at the end of the current application
@@ -186,6 +191,7 @@ class Dispatcher extends Component
         foreach ($this->targets as $target) {
             if ($target->enabled) {
                 try {
+                    //collect 这个方法真是挺坑的，这个方法就是存储啊，叫 store，或者 flush 都比这个号把
                     $target->collect($messages, $final);
                 } catch (\Exception $e) {
                     $target->enabled = false;

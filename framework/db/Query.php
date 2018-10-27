@@ -130,13 +130,17 @@ class Query extends Component implements QueryInterface, ExpressionInterface
      * @since 2.0.14
      */
     public $queryCacheDependency;
-
-
+    
+    
     /**
      * Creates a DB command that can be used to execute this query.
+     *
      * @param Connection $db the database connection used to generate the SQL statement.
-     * If this parameter is not given, the `db` application component will be used.
+     *                       If this parameter is not given, the `db` application component will be used.
+     *
      * @return Command the created DB command instance.
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
      */
     public function createCommand($db = null)
     {
@@ -257,13 +261,16 @@ class Query extends Component implements QueryInterface, ExpressionInterface
 
         return $result;
     }
-
+    
     /**
      * Executes the query and returns a single row of result.
+     *
      * @param Connection $db the database connection used to generate the SQL statement.
-     * If this parameter is not given, the `db` application component will be used.
+     *                       If this parameter is not given, the `db` application component will be used.
+     *
      * @return array|bool the first row (in terms of an array) of the query result. False is returned if the query
      * results in nothing.
+     * @throws \yii\db\Exception
      */
     public function one($db = null)
     {

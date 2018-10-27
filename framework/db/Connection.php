@@ -263,6 +263,7 @@ class Connection extends Component
      * property value. For example, `{{%post}}` becomes `{{tbl_post}}`.
      */
     public $tablePrefix = '';
+    
     /**
      * @var array mapping between PDO driver names and [[Schema]] classes.
      * The keys of the array are PDO driver names while the values are either the corresponding
@@ -705,12 +706,15 @@ class Connection extends Component
         }
         $this->trigger(self::EVENT_AFTER_OPEN);
     }
-
+    
     /**
      * Creates a command for execution.
-     * @param string $sql the SQL statement to be executed
-     * @param array $params the parameters to be bound to the SQL statement
+     *
+     * @param string $sql    the SQL statement to be executed
+     * @param array  $params the parameters to be bound to the SQL statement
+     *
      * @return Command the DB command
+     * @throws \yii\base\InvalidConfigException
      */
     public function createCommand($sql = null, $params = [])
     {
@@ -804,11 +808,13 @@ class Connection extends Component
             }
         }
     }
-
+    
     /**
      * Returns the schema information for the database opened by this connection.
-     * @return Schema the schema information for the database opened by this connection.
+     *
+     * @return object|\yii\db\Schema
      * @throws NotSupportedException if there is no support for the current driver type
+     * @throws \yii\base\InvalidConfigException
      */
     public function getSchema()
     {
@@ -816,20 +822,32 @@ class Connection extends Component
             return $this->_schema;
         }
 
+        //驱动的名字,mysql, sqlite,mssql
         $driver = $this->getDriverName();
+        
+        //做成配置项，这是一个成功项目的共性。把代码和具体的逻辑剥离
+        //包括我当时做的event拆分，判题服务拆分，都是说把一堆 if/else,拆成可配置的数组。然后代码处理这个配置数组
+        //以后的改动主要是修改配置数组
         if (isset($this->schemaMap[$driver])) {
-            $config = !is_array($this->schemaMap[$driver]) ? ['class' => $this->schemaMap[$driver]] : $this->schemaMap[$driver];
+            $config = !is_array($this->schemaMap[$driver])
+                ? ['class' => $this->schemaMap[$driver]]
+                : $this->schemaMap[$driver];
             $config['db'] = $this;
 
+            //创建schema 对象,顺便缓存了，这个应该是缓存到 db 相关的对象中，跟具体的sql 查询也无关。
+            //基本在laravel中或者 yii2中都是在connection class 中
             return $this->_schema = Yii::createObject($config);
         }
 
         throw new NotSupportedException("Connection does not support reading schema information for '$driver' DBMS.");
     }
-
+    
     /**
      * Returns the query builder for the current DB connection.
+     *
      * @return QueryBuilder the query builder for the current DB connection.
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
      */
     public function getQueryBuilder()
     {
@@ -930,18 +948,22 @@ class Connection extends Component
             $sql
         );
     }
-
+    
     /**
      * Returns the name of the DB driver. Based on the the current [[dsn]], in case it was not set explicitly
      * by an end user.
+     *
      * @return string name of the DB driver
+     * @throws \yii\base\InvalidConfigException
      */
     public function getDriverName()
     {
         if ($this->_driverName === null) {
+            //标准 dsn格式: mysql:host=localhost;dbname=testdb
             if (($pos = strpos($this->dsn, ':')) !== false) {
                 $this->_driverName = strtolower(substr($this->dsn, 0, $pos));
             } else {
+                //这个 else 是什么，何时还会有 pdo 了
                 $this->_driverName = strtolower($this->getSlavePdo()->getAttribute(PDO::ATTR_DRIVER_NAME));
             }
         }
@@ -967,14 +989,17 @@ class Connection extends Component
     {
         return $this->getSchema()->getServerVersion();
     }
-
+    
     /**
      * Returns the PDO instance for the currently active slave connection.
      * When [[enableSlaves]] is true, one of the slaves will be used for read queries, and its PDO instance
      * will be returned by this method.
+     *
      * @param bool $fallbackToMaster whether to return a master PDO in case none of the slave connections is available.
+     *
      * @return PDO the PDO instance for the currently active slave connection. `null` is returned if no slave connection
      * is available and `$fallbackToMaster` is false.
+     * @throws \yii\base\InvalidConfigException
      */
     public function getSlavePdo($fallbackToMaster = true)
     {
@@ -996,13 +1021,16 @@ class Connection extends Component
         $this->open();
         return $this->pdo;
     }
-
+    
     /**
      * Returns the currently active slave connection.
      * If this method is called for the first time, it will try to open a slave connection when [[enableSlaves]] is true.
+     *
      * @param bool $fallbackToMaster whether to return a master connection in case there is no slave connection available.
+     *
      * @return Connection the currently active slave connection. `null` is returned if there is no slave available and
      * `$fallbackToMaster` is false.
+     * @throws \yii\base\InvalidConfigException
      */
     public function getSlave($fallbackToMaster = true)
     {
@@ -1016,12 +1044,14 @@ class Connection extends Component
 
         return $this->_slave === null && $fallbackToMaster ? $this : $this->_slave;
     }
-
+    
     /**
      * Returns the currently active master connection.
      * If this method is called for the first time, it will try to open a master connection.
+     *
      * @return Connection the currently active master connection. `null` is returned if there is no master available.
      * @since 2.0.11
+     * @throws \yii\base\InvalidConfigException
      */
     public function getMaster()
     {

@@ -101,11 +101,14 @@ abstract class BaseActiveRecord extends Model implements ActiveRecordInterface
      * @var array relation names indexed by their link attributes
      */
     private $_relationsDependencies = [];
-
-
+    
+    
     /**
      * {@inheritdoc}
+     * @param $condition
+     *
      * @return static|null ActiveRecord instance matching the condition, or `null` if nothing matches.
+     * @throws \yii\base\InvalidConfigException
      */
     public static function findOne($condition)
     {
@@ -131,8 +134,10 @@ abstract class BaseActiveRecord extends Model implements ActiveRecordInterface
      */
     protected static function findByCondition($condition)
     {
+        //创建query builder
         $query = static::find();
 
+        //如果不是where条件这种数组，那么就是按照主键查询
         if (!ArrayHelper::isAssociative($condition)) {
             // query by primary key
             $primaryKey = static::primaryKey();

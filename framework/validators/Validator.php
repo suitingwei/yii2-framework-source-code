@@ -189,20 +189,23 @@ class Validator extends Component
      * @see when
      */
     public $whenClient;
-
-
+    
+    
     /**
      * Creates a validator object.
-     * @param string|\Closure $type the validator type. This can be either:
-     *  * a built-in validator name listed in [[builtInValidators]];
-     *  * a method name of the model class;
-     *  * an anonymous function;
-     *  * a validator class name.
-     * @param \yii\base\Model $model the data model to be validated.
-     * @param array|string $attributes list of attributes to be validated. This can be either an array of
-     * the attribute names or a string of comma-separated attribute names.
-     * @param array $params initial values to be applied to the validator properties.
+     *
+     * @param string|\Closure $type       the validator type. This can be either:
+     *                                    a built-in validator name listed in [[builtInValidators]];
+     *                                    a method name of the model class;
+     *                                    an anonymous function;
+     *                                    a validator class name.
+     * @param \yii\base\Model $model      the data model to be validated.
+     * @param array|string    $attributes list of attributes to be validated. This can be either an array of
+     *                                    the attribute names or a string of comma-separated attribute names.
+     * @param array           $params     initial values to be applied to the validator properties.
+     *
      * @return Validator the validator
+     * @throws \yii\base\InvalidConfigException
      */
     public static function createValidator($type, $model, $attributes, $params = [])
     {
@@ -292,13 +295,16 @@ class Validator extends Component
             $this->addError($model, $attribute, $result[0], $result[1]);
         }
     }
-
+    
     /**
      * Validates a given value.
      * You may use this method to validate a value out of the context of a data model.
-     * @param mixed $value the data value to be validated.
+     *
+     * @param mixed  $value the data value to be validated.
      * @param string $error the error message to be returned, if the validation fails.
+     *
      * @return bool whether the data is valid.
+     * @throws \yii\base\NotSupportedException
      */
     public function validate($value, &$error = null)
     {

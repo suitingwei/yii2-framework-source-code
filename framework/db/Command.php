@@ -1123,6 +1123,7 @@ class Command extends Component
     }
 
     /**
+     *
      * Performs the actual DB query of a SQL statement.
      * @param string $method method of PDOStatement to be called
      * @param int $fetchMode the result fetch mode. Please refer to [PHP manual](http://www.php.net/manual/en/function.PDOStatement-setFetchMode.php)

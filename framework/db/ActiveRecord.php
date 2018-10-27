@@ -96,8 +96,8 @@ class ActiveRecord extends BaseActiveRecord
      * This is a shortcut of the expression: OP_INSERT | OP_UPDATE | OP_DELETE.
      */
     const OP_ALL = 0x07;
-
-
+    
+    
     /**
      * Loads default values from database table schema.
      *
@@ -110,8 +110,10 @@ class ActiveRecord extends BaseActiveRecord
      * ```
      *
      * @param bool $skipIfSet whether existing value should be preserved.
-     * This will only set defaults for attributes that are `null`.
+     *                        This will only set defaults for attributes that are `null`.
+     *
      * @return $this the model instance itself.
+     * @throws \yii\base\InvalidConfigException
      */
     public function loadDefaultValues($skipIfSet = true)
     {
@@ -349,10 +351,12 @@ class ActiveRecord extends BaseActiveRecord
 
         return $command->execute();
     }
-
+    
     /**
+     * 创建 queryBuilder,使用当前这个 model 所对应的db
      * {@inheritdoc}
-     * @return ActiveQuery the newly created [[ActiveQuery]] instance.
+     * @return object|\yii\db\ActiveQuery
+     * @throws \yii\base\InvalidConfigException
      */
     public static function find()
     {
@@ -371,17 +375,19 @@ class ActiveRecord extends BaseActiveRecord
     {
         return '{{%' . Inflector::camel2id(StringHelper::basename(get_called_class()), '_') . '}}';
     }
-
+    
     /**
+     * 获取表的 schema
+     * ------------------------------------------------------------------------------------------
      * Returns the schema information of the DB table associated with this AR class.
+     *
      * @return TableSchema the schema information of the DB table associated with this AR class.
      * @throws InvalidConfigException if the table for the AR class does not exist.
+     * @throws \yii\base\NotSupportedException
      */
     public static function getTableSchema()
     {
-        $tableSchema = static::getDb()
-            ->getSchema()
-            ->getTableSchema(static::tableName());
+        $tableSchema = static::getDb()->getSchema()->getTableSchema(static::tableName());
 
         if ($tableSchema === null) {
             throw new InvalidConfigException('The table does not exist: ' . static::tableName());
@@ -389,7 +395,7 @@ class ActiveRecord extends BaseActiveRecord
 
         return $tableSchema;
     }
-
+    
     /**
      * Returns the primary key name(s) for this AR class.
      * The default implementation will return the primary key(s) as declared
@@ -402,6 +408,8 @@ class ActiveRecord extends BaseActiveRecord
      * Note that an array should be returned even for a table with single primary key.
      *
      * @return string[] the primary keys of the associated database table.
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
      */
     public static function primaryKey()
     {

@@ -211,16 +211,18 @@ class QueryBuilder extends \yii\base\BaseObject
     {
         $this->conditionClasses = array_merge($this->conditionClasses, $classes);
     }
-
+    
     /**
      * Generates a SELECT SQL statement from a [[Query]] object.
      *
-     * @param Query $query the [[Query]] object from which the SQL statement will be generated.
+     * @param Query $query  the [[Query]] object from which the SQL statement will be generated.
      * @param array $params the parameters to be bound to the generated SQL statement. These parameters will
-     * be included in the result with the additional parameters generated during the query building process.
+     *                      be included in the result with the additional parameters generated during the query building process.
+     *
      * @return array the generated SQL statement (the first array element) and the corresponding
      * parameters to be bound to the SQL statement (the second array element). The parameters returned
      * include those provided in `$params`.
+     * @throws \yii\db\Exception
      */
     public function build($query, $params = [])
     {

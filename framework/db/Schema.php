@@ -716,16 +716,19 @@ abstract class Schema extends BaseObject
             $this->db->username,
         ]));
     }
-
+    
     /**
      * Returns the metadata of the given type for the given table.
      * If there's no metadata in the cache, this method will call
      * a `'loadTable' . ucfirst($type)` named method with the table name to obtain the metadata.
-     * @param string $name table name. The table name may contain schema name if any. Do not quote the table name.
-     * @param string $type metadata type.
-     * @param bool $refresh whether to reload the table metadata even if it is found in the cache.
+     *
+     * @param string $name    table name. The table name may contain schema name if any. Do not quote the table name.
+     * @param string $type    metadata type.
+     * @param bool   $refresh whether to reload the table metadata even if it is found in the cache.
+     *
      * @return mixed metadata.
      * @since 2.0.13
+     * @throws \yii\base\InvalidConfigException
      */
     protected function getTableMetadata($name, $type, $refresh)
     {

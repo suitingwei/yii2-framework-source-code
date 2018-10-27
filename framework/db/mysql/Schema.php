@@ -113,9 +113,10 @@ class Schema extends \yii\db\Schema implements ConstraintFinderInterface
 
         return $this->db->createCommand($sql)->queryColumn();
     }
-
+    
     /**
      * {@inheritdoc}
+     * @throws \Exception
      */
     protected function loadTableSchema($name)
     {

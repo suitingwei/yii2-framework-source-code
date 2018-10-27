@@ -12,6 +12,19 @@ use yii\base\Component;
 
 /**
  * Logger records logged messages in memory and sends them to different targets if [[dispatcher]] is set.
+ * -----------------------------------------------------------------------------------------------------------
+ * logger 是首先把日志内容写在了内存里，然后经过固定的时间或者达到特定的数量之后再进行一次刷新磁盘。整个机制类似于
+ * Mysql Innodb 的insert buffer,会首先将数据存在内存里，以达到最高性能。而 Innodb 是另外开了一个线程去把 insertbuffer
+ * 重新fsync到磁盘，而 yii 的 logger 只能是每次插入新的 log message 之后再检测是否达到刷新指标，然后在刷新到指定的
+ * target。
+ * -----------------------------------------------------------------------------------------------------------
+ * MonoLog,和 yii 的 log 模块设计基本也是差不多。首先有一个logger中控器，中控器会根据 log message 的 level 寻找对
+ * 应的 processor去处理信息，之后再使用对应配置的LogHandler去真正的打印 log。
+ * -----------------------------------------------------------------------------------------------------------
+ * 整体架构来说就是这么几个部件：
+ *      Logger:中控器
+ *      Handler: 具体的 log 存储器(yii 中的 LogTarget)
+ *      Processor: 格式处理器（yii 中没有这个，所有log 都是字符串一行）
  *
  * A Logger instance can be accessed via `Yii::getLogger()`. You can call the method [[log()]] to record a single log message.
  * For convenience, a set of shortcut methods are provided for logging messages of various severity levels
@@ -141,8 +154,12 @@ class Logger extends Component
      */
     public function log($message, $level, $category = 'application')
     {
-        $time = microtime(true);
         $traces = [];
+    
+        //获取打印 log 的时间
+        $time = microtime(true);
+        
+        //添加堆栈信息到 message 里
         if ($this->traceLevel > 0) {
             $count = 0;
             $ts = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
@@ -157,13 +174,17 @@ class Logger extends Component
                 }
             }
         }
+        
         $this->messages[] = [$message, $level, $category, $time, $traces, memory_get_usage()];
+        
+        //判断是否达到了刷新 log 的数量，这里能节约真正更新 log 导致的磁盘、网络 IO
         if ($this->flushInterval > 0 && count($this->messages) >= $this->flushInterval) {
             $this->flush();
         }
     }
 
     /**
+     * 因为yii log 有一个内存 cache 的机制，所以每次刷新 log 到存储的时候都是批量执行的.
      * Flushes log messages from memory to targets.
      * @param bool $final whether this is a final call during a request.
      */

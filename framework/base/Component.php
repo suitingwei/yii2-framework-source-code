@@ -600,9 +600,14 @@ class Component extends BaseObject
      */
     public function trigger($name, Event $event = null)
     {
+        /**
+         * 保证声明在 @see behaviors() 中的事件都被绑定在了event_wildcards数组中。
+         */
         $this->ensureBehaviors();
 
         $eventHandlers = [];
+        
+        // wildcards 通配符
         foreach ($this->_eventWildcards as $wildcard => $handlers) {
             if (StringHelper::matchWildcard($wildcard, $name)) {
                 $eventHandlers = array_merge($eventHandlers, $handlers);

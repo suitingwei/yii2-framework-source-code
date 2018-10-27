@@ -17,10 +17,13 @@ interface RateLimitInterface
 {
     /**
      * Returns the maximum number of allowed requests and the window size.
+     *
      * @param \yii\web\Request $request the current request
      * @param \yii\base\Action $action the action to be executed
+     *
      * @return array an array of two elements. The first element is the maximum number of allowed requests,
      * and the second element is the size of the window in seconds.
+     * [ 100,2 ]
      */
     public function getRateLimit($request, $action);
 
