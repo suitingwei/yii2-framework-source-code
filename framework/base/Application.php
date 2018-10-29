@@ -195,6 +195,8 @@ abstract class Application extends Module
     public function __construct($config = [])
     {
         Yii::$app = $this;
+
+        //保存变量
         static::setInstance($this);
 
         $this->state = self::STATE_BEGIN;
@@ -256,9 +258,12 @@ abstract class Application extends Module
 
         // merge core components with custom components
         foreach ($this->coreComponents() as $id => $component) {
+            //如果配置文件里没有这个组件，那就加进去
             if (!isset($config['components'][$id])) {
                 $config['components'][$id] = $component;
-            } elseif (is_array($config['components'][$id]) && !isset($config['components'][$id]['class'])) {
+            }
+            //这个也就是兼容一种情况,如果没有配置指定的 class，那么久补上
+            elseif (is_array($config['components'][$id]) && !isset($config['components'][$id]['class'])) {
                 $config['components'][$id]['class'] = $component['class'];
             }
         }

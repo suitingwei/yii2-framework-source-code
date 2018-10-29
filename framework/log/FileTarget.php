@@ -98,36 +98,77 @@ class FileTarget extends Target
      * Starting from version 2.0.14, this method throws LogRuntimeException in case the log can not be exported.
      * @throws InvalidConfigException if unable to open the log file for writing
      * @throws LogRuntimeException if unable to write complete log to file
+     * @throws \yii\base\Exception
      */
     public function export()
     {
         $logPath = dirname($this->logFile);
+
+        //创建 log 文件目录
         FileHelper::createDirectory($logPath, $this->dirMode, true);
 
+        //格式化数据
         $text = implode("\n", array_map([$this, 'formatMessage'], $this->messages)) . "\n";
+
+        //打开文件呗
         if (($fp = @fopen($this->logFile, 'a')) === false) {
             throw new InvalidConfigException("Unable to append to log file: {$this->logFile}");
         }
+
+        /**
+         * flock的几种锁介绍
+         * --------------------------------------------------------------------------------------
+         * LOCK_SH: 是读共享锁，大家都是读取的，不会写入更新，所以就一起读吧
+         * LOCK_EX: 是写排它锁，我要写数据了，大家都停下脚步，等我写完了你们在读取、写，不然你们写、读的都是错的
+         * LOCK_UN: 是解开锁，毕竟你加锁了，你也得打开啊，不然谁还能写。
+         */
         @flock($fp, LOCK_EX);
         if ($this->enableRotation) {
             // clear stat cache to ensure getting the real current file size and not a cached one
             // this may result in rotating twice when cached file size is used on subsequent calls
             clearstatcache();
         }
+        /**
+         * 日志轮转,这里要对 php 的文件函数有一个概念
+         * When you use stat(), lstat(), or any of the other functions listed in the affected functions list (below), PHP caches the
+         * information those functions return in order to provide faster performance. However, in certain cases, you may want to clear the
+         * cached information. For instance, if the same file is being checked multiple times within a single script, and that file is in
+         * danger of being removed or changed during that script's operation, you may elect to clear the status cache. In these cases, you
+         * can use the clearstatcache() function to clear the information that PHP caches about a file.
+         */
         if ($this->enableRotation && @filesize($this->logFile) > $this->maxFileSize * 1024) {
+            //日志轮转
+            /**
+             * 轮转其实很简单，就是写入新的文件，把旧的文件重命名成新的
+             * 比如：现有一个 log 文件，app.log,轮转之后会变成app.log_1, 然后新的 log 还是会写入app.log中
+             * 如果有多个文件，那么就会一次把小的文件名字变成大的文件名
+             * app.log => app.log_1
+             * app.log_1 => app.log_2
+             * app.log_2 => app.log_3
+             * app.log_3 => app.log_4
+             * app.log_4 => app.log_5
+             * app.log_5 => null 丢弃
+             */
             $this->rotateFiles();
+            //轮转日志完成之后，对于当前的 app.log文件的锁就解除了，可以放其他的对于这个log 文件的写入了
             @flock($fp, LOCK_UN);
+
+            //释放资源
             @fclose($fp);
+
+            //写入这次的 log 文件
             $writeResult = @file_put_contents($this->logFile, $text, FILE_APPEND | LOCK_EX);
             if ($writeResult === false) {
                 $error = error_get_last();
                 throw new LogRuntimeException("Unable to export log through file!: {$error['message']}");
             }
+            //这里神奇了，还有可能写入的数据不全
             $textSize = strlen($text);
             if ($writeResult < $textSize) {
                 throw new LogRuntimeException("Unable to export whole log through file! Wrote $writeResult out of $textSize bytes.");
             }
         } else {
+            //这里就是不需要轮转的时候，直接写入就行了，其实特么这一段代码是一样的
             $writeResult = @fwrite($fp, $text);
             if ($writeResult === false) {
                 $error = error_get_last();
