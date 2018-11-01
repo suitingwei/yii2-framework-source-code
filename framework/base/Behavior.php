@@ -8,6 +8,8 @@
 namespace yii\base;
 
 /**
+ * 行为就是一个 wrapper，或者说 delegate，让调用方可以通过 php 的魔术调用转移到 behavior 上。
+ * 不过就是另一种解耦。
  * Behavior is the base class for all behavior classes.
  *
  * A behavior can be used to enhance the functionality of an existing component without modifying its code.

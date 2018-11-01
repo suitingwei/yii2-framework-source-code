@@ -9,8 +9,11 @@
 
 require __DIR__.'/vendor/autoload.php';
 
+class MeBehavior extends  \yii\base\Behavior{
+    public $name='my behaviour';
+}
+
 class Foo extends  \yii\base\Component{
-    
     const EVENT_INIT = 'init';
 }
 
@@ -26,3 +29,10 @@ $foo->on(Foo::EVENT_INIT,function($event){
 
 
 $foo->trigger(Foo::EVENT_INIT);
+
+$behaviour = new MeBehavior();
+
+$foo->attachBehavior('test',$behaviour);
+
+
+var_dump($foo->name);

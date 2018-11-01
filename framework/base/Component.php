@@ -800,6 +800,7 @@ class Component extends BaseObject
      * @param string|array|Behavior $behavior the behavior to be attached
      *
      * @return Behavior the attached behavior.
+     * @throws \yii\base\InvalidConfigException
      */
     private function attachBehaviorInternal($name, $behavior)
     {

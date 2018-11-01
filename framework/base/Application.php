@@ -384,11 +384,15 @@ abstract class Application extends Module
     public function run()
     {
         try {
+            //触发请求前的事件，可以用来记录时间，处理 request 信息，加密，限流等
             $this->state = self::STATE_BEFORE_REQUEST;
             $this->trigger(self::EVENT_BEFORE_REQUEST);
 
+            //处理请求，分发 controller
             $this->state = self::STATE_HANDLING_REQUEST;
-            $response = $this->handleRequest($this->getRequest());
+            $response = $this->handleRequest(
+                $this->getRequest()
+            );
 
             $this->state = self::STATE_AFTER_REQUEST;
             $this->trigger(self::EVENT_AFTER_REQUEST);

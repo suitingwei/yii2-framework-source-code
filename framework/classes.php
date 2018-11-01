@@ -247,7 +247,7 @@ return [
   'yii\helpers\BaseUrl' => YII2_PATH . '/helpers/BaseUrl.php',
   'yii\helpers\BaseVarDumper' => YII2_PATH . '/helpers/BaseVarDumper.php',
   'yii\helpers\Console' => YII2_PATH . '/helpers/Console.php',
-  'yii\helpers\FileHelper' => YII2_PATH . '/helpers/FileHelper.php',
+  'yii\helpers\FileHelper' => YII2_PATH . '/helpers/BaseFileHelper.php',
   'yii\helpers\FormatConverter' => YII2_PATH . '/helpers/FormatConverter.php',
   'yii\helpers\Html' => YII2_PATH . '/helpers/Html.php',
   'yii\helpers\HtmlPurifier' => YII2_PATH . '/helpers/HtmlPurifier.php',
