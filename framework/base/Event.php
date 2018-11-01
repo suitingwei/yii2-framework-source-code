@@ -54,9 +54,13 @@ class Event extends BaseObject
 
     /**
      * @var array contains all globally registered event handlers.
+     * 这里其实跟 component 里的 events 属性差不多，唯一不同的是，这里的是静态的，因为他要做一个
+     * 全局 class 调用。不需要有对象就可以绑定给一个class。所以需要一个能直接全局访问的 class。
      */
     private static $_events = [];
+    
     /**
+     * 同上。
      * @var array the globally registered event handlers attached for wildcard patterns (event name wildcard => handlers)
      * @since 2.0.14
      */
@@ -103,7 +107,10 @@ class Event extends BaseObject
     public static function on($class, $name, $handler, $data = null, $append = true)
     {
         $class = ltrim($class, '\\');
-
+    
+        /**
+         * @see \yii\base\Component::on(),就是把绑定放到了 EventClass的静态属性而已
+         */
         if (strpos($class, '*') !== false || strpos($name, '*') !== false) {
             if ($append || empty(self::$_eventWildcards[$name][$class])) {
                 self::$_eventWildcards[$name][$class][] = [$handler, $data];
