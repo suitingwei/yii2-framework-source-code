@@ -738,6 +738,8 @@ class Module extends ServiceLocator
      */
     public function get($id, $throwException = true)
     {
+        //这个属性有点坑，应该叫parentModule啊，如果没有parent，那么应该是调用父类的 get，这个好像基本是 application 才会有。
+        //上一个版本的 yii 代码里都是直接调用的 ServiceLocator的代码
         if (!isset($this->module)) {
             return parent::get($id, $throwException);
         }
