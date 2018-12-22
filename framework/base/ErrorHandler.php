@@ -64,6 +64,7 @@ abstract class ErrorHandler extends Component
         } else {
             set_error_handler([$this, 'handleError']);
         }
+        //提前占据内存， 防止OOM
         if ($this->memoryReserveSize > 0) {
             $this->_memoryReserve = str_repeat('x', $this->memoryReserveSize);
         }

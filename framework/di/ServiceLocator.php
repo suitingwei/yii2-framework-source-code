@@ -124,10 +124,12 @@ class ServiceLocator extends Component
      */
     public function get($id, $throwException = true)
     {
+        //内存缓存
         if (isset($this->_components[$id])) {
             return $this->_components[$id];
         }
 
+        //是否有定义
         if (isset($this->_definitions[$id])) {
             $definition = $this->_definitions[$id];
             if (is_object($definition) && !$definition instanceof Closure) {

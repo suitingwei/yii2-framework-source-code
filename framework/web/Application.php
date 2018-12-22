@@ -79,6 +79,8 @@ class Application extends \yii\base\Application
     {
         if (empty($this->catchAll)) {
             try {
+                //这里的职责分配跟 laravel 倒是不一样，让 request 自己去处理路由
+                //而没有创建一个Router类,其实是有一个 URlManager，但是这个调用链条还是挺诡异的
                 list($route, $params) = $request->resolve();
             } catch (UrlNormalizerRedirectException $e) {
                 $url = $e->url;

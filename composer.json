@@ -1,0 +1,16 @@
+{
+  "name": "sui/yii2-framework-source-code",
+  "authors": [
+    {
+      "name": "sui",
+      "email": "suitingwei@nanzhuxinyu.com"
+    }
+  ],
+  "require": {},
+  "autoload": {
+    "psr-4": {
+      "yii\\": "framework/",
+      "helpers\\": "helpers/"
+    }
+  }
+}

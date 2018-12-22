@@ -9,30 +9,29 @@
 
 require __DIR__.'/vendor/autoload.php';
 
-class MeBehavior extends  \yii\base\Behavior{
-    public $name='my behaviour';
+require(__DIR__ . '/framework/Yii.php');
+
+
+$config = [
+    'id' => uniqid('yii-application'),
+    'basePath' => __DIR__,
+    'components' => [
+       'qwe'  => function(){
+            return 'qwe';
+       }
+    ]
+];
+
+try{
+    
+    $application =  new \yii\web\Application($config);
+    
+    $request  =  $application->getRequest();
+    
+    $application->handleRequest($request);
+    return $application->run();
 }
 
-class Foo extends  \yii\base\Component{
-    const EVENT_INIT = 'init';
+catch (\Exception $exception){
+    \helpers\HtmlHelper::renderException($exception);
 }
-
-$foo = new Foo;
-
-$foo->on(Foo::EVENT_INIT,function($event){
-   echo "the foo class's init event has been triggered!" .PHP_EOL;
-});
-
-$foo->on(Foo::EVENT_INIT,function($event){
-  echo "the second event has been triggered!\n"  ;
-});
-
-
-$foo->trigger(Foo::EVENT_INIT);
-
-$behaviour = new MeBehavior();
-
-$foo->attachBehavior('test',$behaviour);
-
-
-var_dump($foo->name);

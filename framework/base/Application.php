@@ -201,10 +201,15 @@ abstract class Application extends Module
 
         $this->state = self::STATE_BEGIN;
 
+        //绑定路径，补全核心组件的配置。
         $this->preInit($config);
 
+        //注册error handler,拦击整体的报错
         $this->registerErrorHandler($config);
 
+        //这里真是坑，我说怎么看不懂这个代码，这里是说调用指定父类的__construct方法...
+        //这个方法主要是把数组配置项配到$application的属性里，这样可以直接$app->db访问
+        //这个里面还会调用init方法来执行真正的初始化
         Component::__construct($config);
     }
 
@@ -263,6 +268,8 @@ abstract class Application extends Module
                 $config['components'][$id] = $component;
             }
             //这个也就是兼容一种情况,如果没有配置指定的 class，那么久补上
+            //update-1: 这个是为了处理框架的核心组件，比如log，request，view等，这些在框架自己的代码只注册了 class，但是允许用户去在 config 文件中
+            //定制化这个 class 的一些配置，所以遇到这种核心组件没有配置 class 的，就使用默认的 class
             elseif (is_array($config['components'][$id]) && !isset($config['components'][$id]['class'])) {
                 $config['components'][$id]['class'] = $component['class'];
             }
@@ -285,6 +292,7 @@ abstract class Application extends Module
      */
     protected function bootstrap()
     {
+        //加载扩展,就是加载别的对象
         if ($this->extensions === null) {
             $file = Yii::getAlias('@vendor/yiisoft/extensions.php');
             $this->extensions = is_file($file) ? include $file : [];
@@ -306,14 +314,18 @@ abstract class Application extends Module
             }
         }
 
+        //加载脚手架扩展，需要在 application 启动阶段就开启的一些模块,比如log、db、route
         foreach ($this->bootstrap as $mixed) {
             $component = null;
+            //闭包支持，直接执行
             if ($mixed instanceof \Closure) {
                 Yii::debug('Bootstrap with Closure', __METHOD__);
                 if (!$component = call_user_func($mixed, $this)) {
                     continue;
                 }
-            } elseif (is_string($mixed)) {
+            }
+            //允许执行其他类型的配置，字符串支持是一个 class 或者 id
+            elseif (is_string($mixed)) {
                 if ($this->has($mixed)) {
                     $component = $this->get($mixed);
                 } elseif ($this->hasModule($mixed)) {
@@ -347,8 +359,13 @@ abstract class Application extends Module
                 echo "Error: no errorHandler component is configured.\n";
                 exit(1);
             }
+            //设置 errorhandler
             $this->set('errorHandler', $config['components']['errorHandler']);
+            
+            //去除这个配置
             unset($config['components']['errorHandler']);
+            
+            //注册错误处理器
             $this->getErrorHandler()->register();
         }
     }
@@ -375,11 +392,13 @@ abstract class Application extends Module
         parent::setBasePath($path);
         Yii::setAlias('@app', $this->getBasePath());
     }
-
+    
     /**
      * Runs the application.
      * This is the main entrance of an application.
+     *
      * @return int the exit status (0 means normal, non-zero values mean abnormal)
+     * @throws \yii\base\ExitException
      */
     public function run()
     {
