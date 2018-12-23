@@ -7,7 +7,9 @@
 
 namespace yii\base;
 
+use helpers\HtmlHelper;
 use Yii;
+use yii\helpers\Html;
 
 /**
  * Application is the base class for all application classes.
@@ -289,6 +291,7 @@ abstract class Application extends Module
      * Initializes extensions and executes bootstrap components.
      * This method is called by [[init()]] after the application has been fully configured.
      * If you override this method, make sure you also call the parent implementation.
+     * @throws InvalidConfigException
      */
     protected function bootstrap()
     {
@@ -593,6 +596,7 @@ abstract class Application extends Module
     /**
      * Returns the URL manager for this application.
      * @return \yii\web\UrlManager the URL manager for this application.
+     * @throws InvalidConfigException
      */
     public function getUrlManager()
     {

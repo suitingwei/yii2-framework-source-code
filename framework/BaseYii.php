@@ -368,7 +368,7 @@ class BaseYii
     private static $_logger;
     
     /**
-     * @return object
+     * @return object|Logger
      * @throws \yii\base\InvalidConfigException
      */
     public static function getLogger()
@@ -396,8 +396,9 @@ class BaseYii
      * a message when the application is in debug mode.
      * @param string|array $message the message to be logged. This can be a simple string or a more
      * complex data structure, such as array.
-     * @param string $category the category of the message.
+     * @param string       $category the category of the message.
      * @since 2.0.14
+     * @throws InvalidConfigException
      */
     public static function debug($message, $category = 'application')
     {

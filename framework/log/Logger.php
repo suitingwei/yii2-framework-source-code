@@ -7,6 +7,7 @@
 
 namespace yii\log;
 
+use helpers\HtmlHelper;
 use Yii;
 use yii\base\Component;
 
@@ -176,7 +177,7 @@ class Logger extends Component
         }
         
         $this->messages[] = [$message, $level, $category, $time, $traces, memory_get_usage()];
-        
+
         //判断是否达到了刷新 log 的数量，这里能节约真正更新 log 导致的磁盘、网络 IO
         if ($this->flushInterval > 0 && count($this->messages) >= $this->flushInterval) {
             $this->flush();

@@ -110,6 +110,7 @@ class Dispatcher extends Component
      * If not set, [[\Yii::getLogger()]] will be used.
      * @property Logger the logger. If not set, [[\Yii::getLogger()]] will be used.
      * @return Logger the logger.
+     * @throws \yii\base\InvalidConfigException
      */
     public function getLogger()
     {

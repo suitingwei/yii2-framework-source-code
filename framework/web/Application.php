@@ -74,6 +74,7 @@ class Application extends \yii\base\Application
      * @param Request $request the request to be handled
      * @return Response the resulting response
      * @throws NotFoundHttpException if the requested route is invalid
+     * @throws \yii\base\InvalidConfigException
      */
     public function handleRequest($request)
     {

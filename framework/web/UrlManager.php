@@ -301,6 +301,7 @@ class UrlManager extends Component
      * @param Request $request the request component
      * @return array|bool the route and the associated parameters. The latter is always empty
      * if [[enablePrettyUrl]] is `false`. `false` is returned if the current request cannot be successfully parsed.
+     * @throws InvalidConfigException
      */
     public function parseRequest($request)
     {
