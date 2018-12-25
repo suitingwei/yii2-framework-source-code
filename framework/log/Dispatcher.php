@@ -7,6 +7,7 @@
 
 namespace yii\log;
 
+use helpers\HtmlHelper;
 use Yii;
 use yii\base\Component;
 use yii\base\ErrorHandler;

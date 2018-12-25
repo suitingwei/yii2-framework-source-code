@@ -129,6 +129,7 @@ abstract class Target extends Component
         );
         $count = count($this->messages);
         //除了 logger 本身有一个 c
+        
         if ($count > 0 && ($final || $this->exportInterval > 0 && $count >= $this->exportInterval)) {
             if (($context = $this->getContextMessage()) !== '') {
                 $this->messages[] = [$context, Logger::LEVEL_INFO, 'application', YII_BEGIN_TIME];

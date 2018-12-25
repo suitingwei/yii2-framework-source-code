@@ -548,12 +548,17 @@ class BaseYii
 
     /**
      * 使用数组的形式来给一个对象初始化属性
+     * ----------------------------------------------------------------------------------------
      * 这个方法是从配置化的数字生成灵活的对象的一个中间媒介。
      * 可以想象如果没有这个方法，那么初始化一个 Application 这种复杂的对象，可能需要手动写一堆的
      * ```
      *  $app->id = 'qweqwe';
      *  $app->components = [];
      * ```
+     * ----------------------------------------------------------------------------------------
+     * 注意这个地方有一个坑，因为某些 class 是实现了__set魔术方法的，所以这个configure方法会触发这些 class 的
+     * __set调用。这个只能说是所有继承了BaseObject的类都会有这个机制。也就是说基本上所有的都有这个了。这也就
+     * 导致了有些方法我们是搜不到全局调用的。因为他们都是魔术触发额。
      * Configures an object with the initial property values.
      * @param object $object the object to be configured
      * @param array $properties the property initial values given in terms of name-value pairs.

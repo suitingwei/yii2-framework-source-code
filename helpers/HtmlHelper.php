@@ -71,7 +71,7 @@ HTML;
             $html.="</tbody></table>";
         }
         catch (\Exception $exception){
-//            die($exception);
+            die($exception);
         }
         if($exit){
             echo $html;die();

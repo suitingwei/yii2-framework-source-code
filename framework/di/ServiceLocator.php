@@ -60,13 +60,16 @@ class ServiceLocator extends Component
      * @var array component definitions indexed by their IDs
      */
     private $_definitions = [];
-
-
+    
     /**
      * Getter magic method.
      * This method is overridden to support accessing components like reading properties.
+     *
      * @param string $name component or property name
+     *
      * @return mixed the named property value
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\UnknownPropertyException
      */
     public function __get($name)
     {

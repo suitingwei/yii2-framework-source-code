@@ -18,8 +18,18 @@ require(__DIR__ . '/framework/Yii.php');
 $config = [
     'id'         => uniqid('yii-application'),
     'basePath'   => __DIR__,
-//    'bootstrap' => ['log'],
+    'bootstrap'  => ['log'],
     'components' => [
+        'log'        => [
+            'flushInterval'=>1,
+            'targets' => [
+                'file' => [
+                    'class'      => 'yii\log\FileTarget',
+                    'levels'     => ['trace', 'info'],
+                    'categories' => ['yii\*'],
+                ],
+            ],
+        ],
         'urlManager' => [
             'enablePrettyUrl'     => true,
             'showScriptName'      => false,
@@ -28,6 +38,9 @@ $config = [
                 // ...
             ],
         ],
+    ],
+    'modules' => [
+        'user' => 'app/modules/user/UserModule.php'
     ],
 ];
 
@@ -41,21 +54,14 @@ $config = [
 //});
 
 try {
-
+    
     $application = new \yii\web\Application($config);
-
-    var_dump($application->has('log',true));
-    var_dump($application->has('request',true));
-    var_dump($application->has('response',true));
-    var_dump($application->has('formatter',true));
-    var_dump($application->has('view',true));
-    var_dump($application->has('urlManager',true));
-
-//    $request = $application->getRequest();
-//
-//    $application->handleRequest($request);
-//
-//    return $application->run();
+    
+    $request = $application->getRequest();
+    
+    $application->handleRequest($request);
+    
+    return $application->run();
 } catch (\Exception $exception) {
     \helpers\HtmlHelper::renderException($exception);
 }

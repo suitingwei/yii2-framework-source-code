@@ -351,7 +351,6 @@ class UrlManager extends Component
                 // pathInfo was changed by normalizer - we need also normalize route
                 return $this->normalizer->normalizeRoute([$pathInfo, []]);
             }
-
             return [$pathInfo, []];
         }
 

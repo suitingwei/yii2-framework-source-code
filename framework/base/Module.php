@@ -399,15 +399,18 @@ class Module extends ServiceLocator
 
         return isset($this->_modules[$id]);
     }
-
+    
     /**
      * Retrieves the child module of the specified ID.
      * This method supports retrieving both child modules and grand child modules.
-     * @param string $id module ID (case-sensitive). To retrieve grand child modules,
-     * use ID path relative to this module (e.g. `admin/content`).
-     * @param bool $load whether to load the module if it is not yet loaded.
+     *
+     * @param string $id   module ID (case-sensitive). To retrieve grand child modules,
+     *                     use ID path relative to this module (e.g. `admin/content`).
+     * @param bool   $load whether to load the module if it is not yet loaded.
+     *
      * @return Module|null the module instance, `null` if the module does not exist.
      * @see hasModule()
+     * @throws \yii\base\InvalidConfigException
      */
     public function getModule($id, $load = true)
     {
@@ -506,16 +509,19 @@ class Module extends ServiceLocator
             $this->_modules[$id] = $module;
         }
     }
-
+    
     /**
      * Runs a controller action specified by a route.
      * This method parses the specified route and creates the corresponding child module(s), controller and action
      * instances. It then calls [[Controller::runAction()]] to run the action with the given parameters.
      * If the route is empty, the method will use [[defaultRoute]].
-     * @param string $route the route that specifies the action.
-     * @param array $params the parameters to be passed to the action
+     *
+     * @param string $route  the route that specifies the action.
+     * @param array  $params the parameters to be passed to the action
+     *
      * @return mixed the result of the action.
-     * @throws InvalidRouteException if the requested route cannot be resolved into an action successfully.
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\InvalidRouteException if the requested route cannot be resolved into an action successfully.
      */
     public function runAction($route, $params = [])
     {
@@ -579,6 +585,7 @@ class Module extends ServiceLocator
         }
 
         // module and controller map take precedence
+        // 也是一发内存缓存,可能有一次请求多个 controller吗？
         if (isset($this->controllerMap[$id])) {
             $controller = Yii::createObject($this->controllerMap[$id], [$id, $this]);
             return [$controller, $route];

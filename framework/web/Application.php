@@ -100,9 +100,12 @@ class Application extends \yii\base\Application
             $params = $this->catchAll;
             unset($params[0]);
         }
+        
         try {
             Yii::debug("Route requested: '$route'", __METHOD__);
             $this->requestedRoute = $route;
+            
+            //通过路由配置，以及参数，解析创建 controller
             $result = $this->runAction($route, $params);
             if ($result instanceof Response) {
                 return $result;

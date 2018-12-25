@@ -9,6 +9,7 @@ namespace yii\log;
 
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\helpers\BaseFileHelper;
 use yii\helpers\FileHelper;
 
 /**
@@ -105,8 +106,8 @@ class FileTarget extends Target
         $logPath = dirname($this->logFile);
 
         //创建 log 文件目录
-        FileHelper::createDirectory($logPath, $this->dirMode, true);
-
+        BaseFileHelper::createDirectory($logPath, $this->dirMode, true);
+    
         //格式化数据
         $text = implode("\n", array_map([$this, 'formatMessage'], $this->messages)) . "\n";
 

@@ -10,7 +10,8 @@
   "autoload": {
     "psr-4": {
       "yii\\": "framework/",
-      "helpers\\": "helpers/"
+      "helpers\\": "helpers/",
+      "app\\": "app/"
     }
   }
 }
