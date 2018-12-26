@@ -30,7 +30,6 @@ use yii\di\ServiceLocator;
  * @property string $controllerPath The directory that contains the controller classes. This property is
  * read-only.
  * @property string $layoutPath The root directory of layout files. Defaults to "[[viewPath]]/layouts".
- * @property array $modules The modules (indexed by their IDs).
  * @property string $uniqueId The unique ID of the module. This property is read-only.
  * @property string $version The version of this module. Note that the type of this property differs in getter
  * and setter. See [[getVersion()]] and [[setVersion()]] for details.
@@ -414,13 +413,16 @@ class Module extends ServiceLocator
      */
     public function getModule($id, $load = true)
     {
+        //如果是带有父子路径的 id，那么依次往下查找 module
         if (($pos = strpos($id, '/')) !== false) {
             // sub-module
+            //先获取第一层的 module ，这一层都是配置在application->config中的，在整个 application bootstrap 阶段加载的
             $module = $this->getModule(substr($id, 0, $pos));
 
             return $module === null ? null : $module->getModule(substr($id, $pos + 1), $load);
         }
 
+        //当走到这里的时候，对于整个 application 来说，他的所有 modules 是已经加载完毕的，对于子模块来说，是保存在其对应的模块的属性里的
         if (isset($this->_modules[$id])) {
             if ($this->_modules[$id] instanceof self) {
                 return $this->_modules[$id];
@@ -585,11 +587,14 @@ class Module extends ServiceLocator
         }
 
         // module and controller map take precedence
-        // 也是一发内存缓存,可能有一次请求多个 controller吗？
+        //这个是类似 laravel 的 routes 配置数组，也是在配置中写的一些规则映射
         if (isset($this->controllerMap[$id])) {
             $controller = Yii::createObject($this->controllerMap[$id], [$id, $this]);
             return [$controller, $route];
         }
+        
+        // 这里是走的一种模块->控制器型的路由查找，通过uri 的前缀部分作为模块来查找对应的模块，然后使用模块的 controller 来处理请求
+        // 比如这个最开始传进来的 `$route='/usr/admin/auth/login';`
         $module = $this->getModule($id);
         if ($module !== null) {
             return $module->createController($route);

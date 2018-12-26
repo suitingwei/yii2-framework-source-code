@@ -12,5 +12,11 @@ use yii\base\Module;
 
 class UserModule extends Module
 {
-
+    public function init()
+    {
+        parent::init();
+        $this->modules= [
+            'admin' => 'app\modules\user\admin\AdminModule'
+        ];
+    }
 }
