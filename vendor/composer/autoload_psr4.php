@@ -8,5 +8,5 @@ $baseDir = dirname($vendorDir);
 return array(
     'yii\\' => array($baseDir . '/framework'),
     'helpers\\' => array($baseDir . '/helpers'),
-    'app\\' => array($baseDir . '/app'),
+//    'app\\' => array($baseDir . '/app'),
 );

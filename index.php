@@ -48,7 +48,7 @@ $config = [
      */
     'modules' => [
         'user' =>[
-            'class' => 'app\modules\user\usermodule'
+            'class' => 'app\modules\user\UserModule'
         ]
     ],
 ];

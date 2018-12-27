@@ -356,16 +356,18 @@ class ClassLoader
      */
     public function findFile($class)
     {
-        // class map lookup
         // classMap 是在composer dump-autoload -o 这个优化选项做的处理
         // 在这种优化模式下，会把命名空间的映射表保存到这个数组中，然后查询这个数组。
-        // 但是在
+        // 但是如果这个数组里找不到映射的话，还会再去通过fallback查询，而不是直接报错
         if (isset($this->classMap[$class])) {
             return $this->classMap[$class];
         }
+        //这个是composer dump-autoload -a 优化模式，这个模式会组织 fallback
         if ($this->classMapAuthoritative || isset($this->missingClasses[$class])) {
             return false;
         }
+        
+        //另一种优化模式，通过apcu进行缓存
         if (null !== $this->apcuPrefix) {
             $file = apcu_fetch($this->apcuPrefix.$class, $hit);
             if ($hit) {
@@ -373,6 +375,7 @@ class ClassLoader
             }
         }
 
+        //不带有任何优化的时候，直接根据psr-4,psr-0的配置数组进行查询
         $file = $this->findFileWithExtension($class, '.php');
 
         // Search for Hack files if we are running on HHVM
@@ -391,20 +394,46 @@ class ClassLoader
 
         return $file;
     }
-
+    
+    /**
+     * 根据psr-4,psr-0 搜索加载文件
+     * @param $class
+     * @param $ext
+     *
+     * @return bool|string
+     */
     private function findFileWithExtension($class, $ext)
     {
-        // PSR-4 lookup
+        // PSR-4 lookup,替换命名空间的反斜杠变成路径分隔符\
+        // 比如这个命名空间: app\models\user\User; 对应的文件系统是: app/models/user/User.php;
         $logicalPathPsr4 = strtr($class, '\\', DIRECTORY_SEPARATOR) . $ext;
-
+        
+        //获取顶级前缀,这个是为了快速索引，通过首字母分组，能快速定位顶级域名
         $first = $class[0];
+        
+        //如果psr-4 的缩写命名空间能找到这个文件,那么就从这里面找到对应的完整namespace
         if (isset($this->prefixLengthsPsr4[$first])) {
             $subPath = $class;
+            
+            /**
+             * 这里的整体思路就是按照命名空间和文件系统的映射来查找文件
+             * 比如这个命名空间: app\models\user\User; 对应的文件系统是: path-to-projcet/app/models/user/User.php;
+             * 那么就一层一层的往目录里查找这个文件，因为顶级namespace:[app] 是映射到了某一个具体的路径： path-to-project
+             */
             while (false !== $lastPos = strrpos($subPath, '\\')) {
+                //截取第 N 个目录段,比如 app, 或者models...
                 $subPath = substr($subPath, 0, $lastPos);
-                $search = $subPath.'\\';
+                
+                //拼接顶级namespace,因为这个完整的namespace->filepath映射是带有反斜杠的。
+                $search  = $subPath . '\\';
+                
+                //如果第N个目录段是顶级namespace,那么它在psr-4中有配置，那么就找到这个顶级namespace绝对目录地址
                 if (isset($this->prefixDirsPsr4[$search])) {
+                    // 比如这个命名空间: app\models\user\User; 对应的文件系统是: path-to-projcet/app/models/user/User.php;
                     $pathEnd = DIRECTORY_SEPARATOR . substr($logicalPathPsr4, $lastPos + 1);
+                    
+                    //有了vendor-namespace 之后，还需要判断具体是哪一个目录中有这个文件
+                    //比如同样是 app 这个vendor-namespace,可能有 app/models/user/User.php, 也可能有 app/views/customer/Client.php;
                     foreach ($this->prefixDirsPsr4[$search] as $dir) {
                         if (file_exists($file = $dir . $pathEnd)) {
                             return $file;
@@ -413,24 +442,24 @@ class ClassLoader
                 }
             }
         }
-
+        
         // PSR-4 fallback dirs
         foreach ($this->fallbackDirsPsr4 as $dir) {
             if (file_exists($file = $dir . DIRECTORY_SEPARATOR . $logicalPathPsr4)) {
                 return $file;
             }
         }
-
+        
         // PSR-0 lookup
         if (false !== $pos = strrpos($class, '\\')) {
             // namespaced class name
             $logicalPathPsr0 = substr($logicalPathPsr4, 0, $pos + 1)
-                . strtr(substr($logicalPathPsr4, $pos + 1), '_', DIRECTORY_SEPARATOR);
+                               . strtr(substr($logicalPathPsr4, $pos + 1), '_', DIRECTORY_SEPARATOR);
         } else {
             // PEAR-like class name
             $logicalPathPsr0 = strtr($class, '_', DIRECTORY_SEPARATOR) . $ext;
         }
-
+        
         if (isset($this->prefixesPsr0[$first])) {
             foreach ($this->prefixesPsr0[$first] as $prefix => $dirs) {
                 if (0 === strpos($class, $prefix)) {
@@ -442,19 +471,19 @@ class ClassLoader
                 }
             }
         }
-
+        
         // PSR-0 fallback dirs
         foreach ($this->fallbackDirsPsr0 as $dir) {
             if (file_exists($file = $dir . DIRECTORY_SEPARATOR . $logicalPathPsr0)) {
                 return $file;
             }
         }
-
+        
         // PSR-0 include paths.
         if ($this->useIncludePath && $file = stream_resolve_include_path($logicalPathPsr0)) {
             return $file;
         }
-
+        
         return false;
     }
 }
