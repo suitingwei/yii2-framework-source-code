@@ -16,6 +16,11 @@ require(__DIR__ . '/framework/Yii.php');
 $config = [
     'id'         => uniqid('yii-application'),
     'basePath'   => __DIR__,
+    /**
+     * 位于bootstrap配置的所有组件都会在整个application初始化完毕之后
+     * 进行引导。这个所谓的引导就是把这些组件进行实例化,因为components中的
+     * 所有的配置对象只会加载到applications的数组中，并不会进行实例创建。
+     */
     'bootstrap'  => ['log'],
     'components' => [
         'log'        => [
@@ -63,7 +68,6 @@ $config = [
 //});
 
 try {
-    
     $application = new \yii\web\Application($config);
     
     $request = $application->getRequest();
@@ -74,3 +78,7 @@ try {
 } catch (\Exception $exception) {
     \helpers\HtmlHelper::renderException($exception);
 }
+
+
+
+

@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: sui
- * Date: 2018/12/26
- * Time: 17:24
- */
-
 //手动指定这个 Class 的目录
 include "./src/User.php";
 

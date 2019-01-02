@@ -1,17 +1,14 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: sui
- * Date: 2018/12/26
- * Time: 17:24
- */
 
 //注册自动加载
 spl_autoload_register(function($class){
+    #namespace: src\User
+    #fileSystem: src/User
     //最简单的autoload,部分遵守了PSR-0,把 namespace 和 filePath互换而已
     $filePath = strtr($class,'\\',DIRECTORY_SEPARATOR) .'.php';
     
     if(file_exists($filePath)){
+        echo "检查自动加载，找到文件了!\n";
         include $filePath;
         return true;
     }
