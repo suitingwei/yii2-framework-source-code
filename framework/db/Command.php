@@ -1121,16 +1121,21 @@ class Command extends Component
 
         return [true, isset($rawSql) ? $rawSql : $this->getRawSql()];
     }
-
+    
     /**
      *
      * Performs the actual DB query of a SQL statement.
-     * @param string $method method of PDOStatement to be called
-     * @param int $fetchMode the result fetch mode. Please refer to [PHP manual](http://www.php.net/manual/en/function.PDOStatement-setFetchMode.php)
-     * for valid fetch modes. If this parameter is null, the value set in [[fetchMode]] will be used.
+     *
+     * @param string $method    method of PDOStatement to be called
+     * @param int    $fetchMode the result fetch mode. Please refer to [PHP
+     *                          manual](http://www.php.net/manual/en/function.PDOStatement-setFetchMode.php) for valid fetch modes. If this parameter
+     *                          is null, the value set in [[fetchMode]] will be used.
+     *
      * @return mixed the method execution result
      * @throws Exception if the query causes any problem
      * @since 2.0.1 this method is protected (was private before).
+     * @throws \yii\base\InvalidConfigException
+     * @throws \Throwable
      */
     protected function queryInternal($method, $fetchMode = null)
     {
@@ -1151,6 +1156,7 @@ class Command extends Component
             }
         }
 
+        //Pdo prepare statement
         $this->prepare(true);
 
         try {
@@ -1263,7 +1269,7 @@ class Command extends Component
         $this->_retryHandler = $handler;
         return $this;
     }
-
+    
     /**
      * Executes a prepared statement.
      *
@@ -1271,8 +1277,10 @@ class Command extends Component
      * and retry handlers.
      *
      * @param string|null $rawSql the rawSql if it has been created.
+     *
      * @throws Exception if execution failed.
      * @since 2.0.14
+     * @throws \Throwable
      */
     protected function internalExecute($rawSql)
     {

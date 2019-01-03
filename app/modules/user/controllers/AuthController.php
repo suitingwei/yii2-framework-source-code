@@ -18,8 +18,9 @@ class AuthController extends Controller
     public function actionLogin()
     {
         try {
-            return $this->testMultipleConnections();
+//            return $this->testMultipleConnections();
 //            return $this->testSingleConnection();
+            return $this->testMySqlDie();
         } catch (InvalidConfigException $e) {
             die($e);
         } catch (Exception $e) {
@@ -108,6 +109,28 @@ class AuthController extends Controller
         });
         $connection->open();
         var_dump(spl_object_id($connection));
+    }
+    
+    private function testMySqlDie()
+    {
+        /**
+         * dsn,username,password都是直接赋予了connection的属性
+         */
+        $dbConfig = [
+            'username'        => 'wordpress',
+            'password'        => '',
+            'dsn'             => 'mysql:host=localhost;dbname=wordpress;port=3306',
+            'enableProfiling' => true
+        ];
+    
+        //创建connection对象，这个对象表示的是一个连接，他是可以做到读写分离,
+        //负载均衡的,在创建之后，这个链接其实还没有open。在 ORM 中是由command
+        //对象去查询的时候，才会触发 connection 的链接
+        $connection = new Connection($dbConfig);
+        $connection->open();
+        sleep(10);
+        $result = $connection->createCommand("show tables")->queryAll();
+        print_r($result);
     }
     
     /**
