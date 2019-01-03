@@ -41,6 +41,9 @@ $config = [
                 // ...
             ],
         ],
+        'tutu'=> [
+            'class' => \app\modules\user\controllers\Test::class
+        ]
     ],
     
     /**
@@ -73,7 +76,7 @@ try {
     $request = $application->getRequest();
 
     $application->handleRequest($request);
-    
+
     return $application->run();
 } catch (\Exception $exception) {
     \helpers\HtmlHelper::renderException($exception);

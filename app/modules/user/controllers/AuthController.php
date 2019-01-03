@@ -8,7 +8,9 @@
 
 namespace app\modules\user\controllers;
 
+use Yii;
 use yii\base\InvalidConfigException;
+use yii\db\ActiveRecord;
 use yii\db\Connection;
 use yii\db\Exception;
 use yii\web\Controller;
@@ -20,7 +22,7 @@ class AuthController extends Controller
         try {
 //            return $this->testMultipleConnections();
 //            return $this->testSingleConnection();
-            return $this->testMySqlDie();
+//            return $this->testMySqlDie();
         } catch (InvalidConfigException $e) {
             die($e);
         } catch (Exception $e) {
@@ -122,7 +124,7 @@ class AuthController extends Controller
             'dsn'             => 'mysql:host=localhost;dbname=wordpress;port=3306',
             'enableProfiling' => true
         ];
-    
+        
         //创建connection对象，这个对象表示的是一个连接，他是可以做到读写分离,
         //负载均衡的,在创建之后，这个链接其实还没有open。在 ORM 中是由command
         //对象去查询的时候，才会触发 connection 的链接
@@ -155,5 +157,22 @@ class AuthController extends Controller
         $result  = $command->queryAll();
         
         return json_encode($result);
+    }
+    
+    public function actionTest()
+    {
+        $logger               = $router = null;
+        Yii::$app->components =
+            [
+                'logger' => $logger,
+                'router' => $router,
+                'db'     => [
+                    'class'  => ActiveRecord::class,
+                ],
+                'user' => function(){
+                    echo "i am a callback";
+                    return [];
+                }
+            ];
     }
 }

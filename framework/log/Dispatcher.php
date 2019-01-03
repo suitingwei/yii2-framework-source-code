@@ -88,7 +88,7 @@ class Dispatcher extends Component
         }
         // connect logger and dispatcher
         $this->getLogger();
-
+    
         parent::__construct($config);
     }
 

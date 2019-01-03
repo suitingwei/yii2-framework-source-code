@@ -127,6 +127,7 @@ class ServiceLocator extends Component
      */
     public function get($id, $throwException = true)
     {
+        //IOC Container
         //内存缓存
         if (isset($this->_components[$id])) {
             return $this->_components[$id];
