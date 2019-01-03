@@ -554,6 +554,7 @@ class Connection extends Component
      *
      * @return array the current query cache information, or null if query cache is not enabled.
      * @internal
+     * @throws \yii\base\InvalidConfigException
      */
     public function getQueryCacheInfo($duration, $dependency)
     {
@@ -650,6 +651,8 @@ class Connection extends Component
     /**
      * Closes the currently active DB connection.
      * It does nothing if the connection is already closed.
+     *
+     * @throws \yii\base\InvalidConfigException
      */
     public function close()
     {
@@ -716,6 +719,9 @@ class Connection extends Component
      * The default implementation turns on `PDO::ATTR_EMULATE_PREPARES`
      * if [[emulatePrepare]] is true, and sets the database [[charset]] if it is not empty.
      * It then triggers an [[EVENT_AFTER_OPEN]] event.
+     *
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
      */
     protected function initConnection()
     {
@@ -737,6 +743,7 @@ class Connection extends Component
      *
      * @return Command the DB command
      * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
      */
     public function createCommand($sql = null, $params = [])
     {
@@ -772,6 +779,8 @@ class Connection extends Component
      *                                    See [[Transaction::begin()]] for details.
      *
      * @return Transaction the transaction initiated
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
      */
     public function beginTransaction($isolationLevel = null)
     {
@@ -843,6 +852,7 @@ class Connection extends Component
      * @return object|\yii\db\Schema
      * @throws NotSupportedException if there is no support for the current driver type
      * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
      */
     public function getSchema()
     {
@@ -876,6 +886,7 @@ class Connection extends Component
      * @return QueryBuilder the query builder for the current DB connection.
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\base\NotSupportedException
+     * @throws \yii\db\Exception
      */
     public function getQueryBuilder()
     {
@@ -887,7 +898,10 @@ class Connection extends Component
      *
      * @param array $value the [[QueryBuilder]] properties to be configured.
      *
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
      * @since 2.0.14
+     * @throws \yii\db\Exception
      */
     public function setQueryBuilder($value)
     {
@@ -901,6 +915,9 @@ class Connection extends Component
      * @param bool   $refresh whether to reload the table schema even if it is found in the cache.
      *
      * @return TableSchema table schema information. Null if the named table does not exist.
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
+     * @throws \yii\db\Exception
      */
     public function getTableSchema($name, $refresh = false)
     {
@@ -913,7 +930,10 @@ class Connection extends Component
      * @param string $sequenceName name of the sequence object (required by some DBMS)
      *
      * @return string the row ID of the last row inserted, or the last value retrieved from the sequence object
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
      * @see http://php.net/manual/en/pdo.lastinsertid.php
+     * @throws \yii\db\Exception
      */
     public function getLastInsertID($sequenceName = '')
     {
@@ -927,7 +947,10 @@ class Connection extends Component
      * @param string $value string to be quoted
      *
      * @return string the properly quoted string
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
      * @see http://php.net/manual/en/pdo.quote.php
+     * @throws \yii\db\Exception
      */
     public function quoteValue($value)
     {
@@ -943,6 +966,9 @@ class Connection extends Component
      * @param string $name table name
      *
      * @return string the properly quoted table name
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
+     * @throws \yii\db\Exception
      */
     public function quoteTableName($name)
     {
@@ -958,6 +984,9 @@ class Connection extends Component
      * @param string $name column name
      *
      * @return string the properly quoted column name
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
+     * @throws \yii\db\Exception
      */
     public function quoteColumnName($name)
     {
@@ -996,6 +1025,7 @@ class Connection extends Component
      *
      * @return string name of the DB driver
      * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
      */
     public function getDriverName()
     {
@@ -1026,7 +1056,10 @@ class Connection extends Component
      * Returns a server version as a string comparable by [[\version_compare()]].
      *
      * @return string server version as a string.
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
      * @since 2.0.14
+     * @throws \yii\db\Exception
      */
     public function getServerVersion()
     {
@@ -1043,6 +1076,7 @@ class Connection extends Component
      * @return PDO the PDO instance for the currently active slave connection. `null` is returned if no slave connection
      * is available and `$fallbackToMaster` is false.
      * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
      */
     public function getSlavePdo($fallbackToMaster = true)
     {
@@ -1059,6 +1093,8 @@ class Connection extends Component
      * This method will open the master DB connection and then return [[pdo]].
      *
      * @return PDO the PDO instance for the currently active master connection.
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
      */
     public function getMasterPdo()
     {
@@ -1265,6 +1301,7 @@ class Connection extends Component
     {
         $fields = (array)$this;
         
+        //这里是谜一样的东西，看不懂
         unset($fields['pdo']);
         unset($fields["\000" . __CLASS__ . "\000" . '_master']);
         unset($fields["\000" . __CLASS__ . "\000" . '_slave']);
@@ -1289,5 +1326,15 @@ class Connection extends Component
             // reset PDO connection, unless its sqlite in-memory, which can only have one connection
             $this->pdo = null;
         }
+    }
+    
+    public function getSlaveAttribute()
+    {
+        return $this->_slave;
+    }
+    
+    public function getMasterAttribute()
+    {
+        return $this->_master;
     }
 }
