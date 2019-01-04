@@ -43,6 +43,12 @@ $config = [
         ],
         'tutu'=> [
             'class' => \app\modules\user\controllers\Test::class
+        ],
+        'db' => [
+            'class' => 'yii\db\Connection',
+            'dsn' => 'mysql:host=127.0.0.1;dbname=wordpress;',
+            'username' => 'wordpress',
+            'password'=> ''
         ]
     ],
     
@@ -74,8 +80,6 @@ try {
     $application = new \yii\web\Application($config);
     
     $request = $application->getRequest();
-
-    $application->handleRequest($request);
 
     return $application->run();
 } catch (\Exception $exception) {
